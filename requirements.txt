@@ -1,4 +1,5 @@
 fastapi
-uvicorn
-pandas
-evidently
+alibi-detect
+prometheus-client
+pytest
+flake8

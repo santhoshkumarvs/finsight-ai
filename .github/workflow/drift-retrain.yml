@@ -1,0 +1,55 @@
+name: Drift-Based Retraining
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  drift_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install alibi-detect prometheus-client
+
+      - name: Run drift detection and extract score
+        id: drift
+        run: |
+          echo "Running drift detection..."
+          SCORE=$(python monitoring/prometheus_metrics_exporter.py --return-only-score)
+          echo "Drift score: $SCORE"
+          echo "drift_score=$SCORE" >> $GITHUB_OUTPUT
+
+  auto_retrain:
+    needs: drift_check
+    runs-on: ubuntu-latest
+    if: needs.drift_check.outputs.drift_score != '' && needs.drift_check.outputs.drift_score < 0.05
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Trigger model retraining
+        run: |
+          echo "Drift score low — auto-retraining triggered!"
+          python llm/trainer.py

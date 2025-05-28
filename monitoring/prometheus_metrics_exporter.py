@@ -1,32 +1,40 @@
-from prometheus_client import Gauge, start_http_server
-from drift_detector import run_drift_detection
-import numpy as np
+import argparse
+from prometheus_client import start_http_server, Gauge
 import time
+from .drift_detector import run_drift_detection
 
-# Define the Prometheus metric
-drift_metric = Gauge('model_drift_score', 'Drift score from Alibi Detect')
-
-def load_reference_data():
-    # Dummy reference data (replace with actual loading logic)
-    return np.random.rand(100, 5)
-
-def load_new_data():
-    # Dummy new data (replace with live batch or sample logic)
-    return np.random.rand(100, 5)
+# Prometheus gauge metric
+drift_metric = Gauge('model_drift_score', 'Score indicating model drift severity')
 
 def export_metrics_loop():
-    # Start Prometheus metrics HTTP server on port 8000
-    start_http_server(8000)
-    print("Prometheus metrics available at http://localhost:8000")
-
-    reference_data = load_reference_data()
-
+    reference_data = [...]  # Replace with real or mock reference data
+    new_data = [...]        # Replace with real or mock current data
     while True:
-        new_data = load_new_data()
         drift_score = run_drift_detection(reference_data, new_data)
-        print(f"Drift score: {drift_score:.4f}")
+        print(f"model_drift_score {drift_score}")
         drift_metric.set(drift_score)
-        time.sleep(60)  # wait 1 minute before next check
+        time.sleep(15)  # Refresh every 15 seconds
 
 if __name__ == "__main__":
-    export_metrics_loop()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--return-only-score", action="store_true", help="Output only the drift score for CI/CD")
+
+    args = parser.parse_args()
+
+    # Mock data (replace with real in prod)
+    reference_data = [[0.1], [0.2], [0.3]]
+    new_data = [[0.15], [0.25], [0.35]]
+
+    drift_score = run_drift_detection(reference_data, new_data)
+
+    if args.return_only_score:
+        print(drift_score)
+    else:
+        print("Prometheus metrics available at http://localhost:8000")
+        start_http_server(8000)
+        drift_metric.set(drift_score)
+        while True:
+            drift_score = run_drift_detection(reference_data, new_data)
+            print(f"model_drift_score {drift_score}")
+            drift_metric.set(drift_score)
+            time.sleep(15)
