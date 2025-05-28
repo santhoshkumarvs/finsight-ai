@@ -1,0 +1,46 @@
+name: Quality Checks
+
+on:
+  push:
+    branches: [main, 'release/*']
+  pull_request:
+    branches: [main, 'release/*']
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🧹 Run flake8 linting
+        run: |
+          pip install flake8
+          flake8 .
+
+      - name: 🧪 Run tests with pytest
+        run: |
+          pip install pytest
+          pytest
+
+      - name: 🔍 Run drift detection
+        run: |
+          python monitoring/run_drift_check.py
+
+      - name: 🔁 Trigger retraining if drift is detected
+        if: ${{ env.DRIFT_DETECTED == 'true' }}
+        run: |
+          echo "Drift detected — retraining model..."
+          python llm/trainer.py
+

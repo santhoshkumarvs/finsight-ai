@@ -5,6 +5,7 @@ from typing import List
 
 SPILL_DATA_DIR = "data/spill_data/"
 
+
 def load_spill_data() -> List[pd.DataFrame]:
     """Load all spill data files from the directory."""
     dataframes = []
@@ -15,9 +16,11 @@ def load_spill_data() -> List[pd.DataFrame]:
             dataframes.append(df)
     return dataframes
 
+
 def chunk_dataframe(df: pd.DataFrame, chunk_size: int = 1000) -> List[pd.DataFrame]:
     """Split large DataFrame into chunks."""
-    return [df[i:i+chunk_size] for i in range(0, df.shape[0], chunk_size)]
+    return [df[i : i + chunk_size] for i in range(0, df.shape[0], chunk_size)]
+
 
 def buffer_chunks() -> List[pd.DataFrame]:
     """Full pipeline: load, concat, and chunk all spill data."""

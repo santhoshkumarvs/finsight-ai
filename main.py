@@ -6,12 +6,16 @@ from monitoring.drift_detector import run_drift_detection
 
 app = FastAPI()
 
+
 @app.get("/")
 def root():
     return {"message": "Welcome to FinSight AI Copilot 🚀"}
 
+
 @app.post("/detect-drift/")
-async def detect_drift(reference: UploadFile = File(...), current: UploadFile = File(...)):
+async def detect_drift(
+    reference: UploadFile = File(...), current: UploadFile = File(...)
+):
     ref_df = pd.read_csv(StringIO((await reference.read()).decode()))
     curr_df = pd.read_csv(StringIO((await current.read()).decode()))
 
