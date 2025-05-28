@@ -2,6 +2,7 @@ import pandas as pd
 from scipy.stats import ks_2samp, chi2_contingency
 from typing import Tuple
 import os
+from prometheus_client import Gauge
 
 def is_categorical(series: pd.Series) -> bool:
     return pd.api.types.is_categorical_dtype(series) or pd.api.types.is_object_dtype(series)
@@ -41,3 +42,7 @@ def run_drift_detection(reference: pd.DataFrame, current: pd.DataFrame, threshol
 
     print(f"✅ Drift detection complete. Report saved to: {os.path.abspath(report_path)}")
     return drift_results, report_path
+
+
+drift_metric = Gauge("drift_score", "Model Drift Score")
+drift_metric.set(drift_score)  # Set this after computing

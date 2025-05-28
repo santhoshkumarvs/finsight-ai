@@ -24,3 +24,7 @@ def get_model_versions():
 def check_drift():
     run_drift_detection()
     return {"status": "Drift report generated."}
+
+from prometheus_fastapi_instrumentator import Instrumentator
+
+instrumentator = Instrumentator().instrument(app).expose(app)
