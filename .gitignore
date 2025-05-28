@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Environments
+.env/
+.venv/
+venv/
+ENV/
+
+# System
+.DS_Store
+*.swp
+*~
+*.bak
+
+# Logs and reports
+*.log
+drift_report.html
+
+# Alibi or ML files
+*.pkl
+*.joblib
+*.h5
+
+# VSCode
+.vscode/
